@@ -399,6 +399,10 @@ RCT_EXPORT_METHOD(confirmPaymentIntent:(NSDictionary<NSString*, id>*)untypedPara
                                                                                          returnURL:parsed.returnURL
                                                                                         completion:^(STPPaymentHandlerActionStatus status, STPPaymentIntent * intent, NSError * error) {
                                                                                             self->requestIsCompleted = YES;
+																																														NSString * error_codes = @"null:null";
+                                                                                            if(intent.lastPaymentError) {
+                                                                                                error_codes = [NSString stringWithFormat:@"%@:%@", intent.lastPaymentError.code, intent.lastPaymentError.declineCode];
+                                                                                            }
 
                                                                                             switch (status) {
                                                                                                 case STPPaymentHandlerActionStatusSucceeded:
@@ -407,13 +411,13 @@ RCT_EXPORT_METHOD(confirmPaymentIntent:(NSDictionary<NSString*, id>*)untypedPara
                                                                                                     return;
                                                                                                 case STPPaymentHandlerActionStatusCanceled:
                                                                                                     [self rejectPromiseWithCode:[self->errorCodes valueForKey:kErrorKeyCancelled][kErrorKeyCode]
-                                                                                                                        message:error.localizedDescription ?: [self->errorCodes valueForKey:kErrorKeyCancelled][kErrorKeyDescription]
-                                                                                                                          error:error];
+                                                                                                                        message:@"cancelled"
+                                                                                                                        ];
                                                                                                     return;
                                                                                                 case STPPaymentHandlerActionStatusFailed:
                                                                                                     [self rejectPromiseWithCode:[self->errorCodes valueForKey:kErrorKeyAuthenticationFailed][kErrorKeyCode]
-                                                                                                                        message:error.localizedDescription ?: [self->errorCodes valueForKey:kErrorKeyAuthenticationFailed][kErrorKeyDescription] ?: @"FAILED"
-                                                                                                                          error:error];
+                                                                                                                        message:error_codes
+                                                                                                                        ];
                                                                                                     return;
                                                                                             }
                                                                                         }];
