@@ -4,12 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.react.bridge.ActivityEventListener;
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -18,6 +17,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.gettipsi.stripe.dialog.AddCardDialogFragment;
+import com.gettipsi.stripe.dialog.AddCardDialogFragmentV2;
 import com.gettipsi.stripe.util.ArgCheck;
 import com.gettipsi.stripe.util.Converters;
 import com.gettipsi.stripe.util.Fun0;
@@ -26,9 +26,7 @@ import com.stripe.android.ApiResultCallback;
 import com.stripe.android.AppInfo;
 import com.stripe.android.PaymentIntentResult;
 import com.stripe.android.SetupIntentResult;
-import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
-import com.stripe.android.TokenCallback;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.ConfirmSetupIntentParams;
@@ -55,7 +53,7 @@ import static com.gettipsi.stripe.util.Converters.convertPaymentMethodToWritable
 import static com.gettipsi.stripe.util.Converters.convertSetupIntentResultToWritableMap;
 import static com.gettipsi.stripe.util.Converters.convertSourceToWritableMap;
 import static com.gettipsi.stripe.util.Converters.convertTokenToWritableMap;
-import static com.gettipsi.stripe.util.Converters.createBankAccount;
+// import static com.gettipsi.stripe.util.Converters.createBankAccount;
 import static com.gettipsi.stripe.util.Converters.createCard;
 import static com.gettipsi.stripe.util.Converters.getBooleanOrNull;
 import static com.gettipsi.stripe.util.Converters.getMapOrNull;
@@ -204,8 +202,8 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
       mStripe.createToken(
         createCard(cardData),
-        mPublicKey,
-        new TokenCallback() {
+       // mPublicKey,
+        new ApiResultCallback<Token>() {
           public void onSuccess(Token token) {
             promise.resolve(convertTokenToWritableMap(token));
           }
@@ -219,6 +217,7 @@ public class StripeModule extends ReactContextBaseJavaModule {
     }
   }
 
+  /*
   @ReactMethod
   public void createTokenWithBankAccount(final ReadableMap accountData, final Promise promise) {
     try {
@@ -227,9 +226,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
       mStripe.createBankAccountToken(
         createBankAccount(accountData),
-        mPublicKey,
-        null,
-        new TokenCallback() {
+        // mPublicKey,
+        // null,
+        new ApiResultCallback<Token>() {
           public void onSuccess(Token token) {
             promise.resolve(convertTokenToWritableMap(token));
           }
@@ -242,6 +241,28 @@ public class StripeModule extends ReactContextBaseJavaModule {
       promise.reject(toErrorCode(e), e.getMessage());
     }
   }
+   */
+
+  // Experiment method
+  @ReactMethod
+  public void paymentRequestWithStripeElement(ReadableMap params, final Promise promise) {
+    Activity currentActivity = getCurrentActivity();
+    try {
+      ArgCheck.nonNull(currentActivity);
+      ArgCheck.notEmptyString(mPublicKey);
+
+      final AddCardDialogFragmentV2 cardDialog = AddCardDialogFragmentV2.newInstance(
+        getErrorCode(mErrorCodes, "cancelled"),
+        getDescription(mErrorCodes, "cancelled")
+      );
+      cardDialog.setPromise(promise);
+      cardDialog.show(currentActivity.getFragmentManager(), "AddNewCard");
+    } catch (Exception e) {
+      promise.reject(toErrorCode(e), e.getMessage());
+    }
+  }
+
+
 
   @ReactMethod
   public void paymentRequestWithCardForm(ReadableMap params, final Promise promise) {
@@ -260,6 +281,7 @@ public class StripeModule extends ReactContextBaseJavaModule {
       promise.reject(toErrorCode(e), e.getMessage());
     }
   }
+
 
   @ReactMethod
   public void paymentRequestWithAndroidPay(final ReadableMap payParams, final Promise promise) {
@@ -433,7 +455,7 @@ public class StripeModule extends ReactContextBaseJavaModule {
 
     ArgCheck.nonNull(sourceParams);
 
-    mStripe.createSource(sourceParams, new SourceCallback() {
+    mStripe.createSource(sourceParams, new ApiResultCallback<Source>() {
       @Override
       public void onError(Exception error) {
         promise.reject(toErrorCode(error));

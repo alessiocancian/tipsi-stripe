@@ -235,6 +235,22 @@ class Stripe {
       android: () => Promise.resolve(),
     })()
 
+
+  paymentRequestWithStripeElement = (options = {}) => {
+    console.log('Calling paymentRequestWithStripeElement');
+    checkInit(this)
+    checkArgs(
+      types.paymentRequestWithStripeElementOptionsPropTypes,
+      options,
+      'options',
+      'Stripe.paymentRequestWithStripeElement'
+    ) 
+    return StripeModule.paymentRequestWithStripeElement({
+      ...options,
+      theme: processTheme(options.theme),
+    })
+  }
+
   paymentRequestWithCardForm = (options = {}) => {
     checkInit(this)
     checkArgs(
@@ -260,16 +276,16 @@ class Stripe {
     return StripeModule.createTokenWithCard(params)
   }
 
-  createTokenWithBankAccount = (params = {}) => {
-    checkInit(this)
-    checkArgs(
-      types.createTokenWithBankAccountParamsPropTypes,
-      params,
-      'params',
-      'Stripe.createTokenWithBankAccount'
-    )
-    return StripeModule.createTokenWithBankAccount(params)
-  }
+  // createTokenWithBankAccount = (params = {}) => {
+  //   checkInit(this)
+  //   checkArgs(
+  //     types.createTokenWithBankAccountParamsPropTypes,
+  //     params,
+  //     'params',
+  //     'Stripe.createTokenWithBankAccount'
+  //   )
+  //   return StripeModule.createTokenWithBankAccount(params)
+  // }
 
   createSourceWithParams = (params = {}) => {
     checkInit(this)

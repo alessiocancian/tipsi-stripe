@@ -1,7 +1,7 @@
 package com.gettipsi.stripe.util;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.facebook.react.bridge.Arguments;
@@ -18,6 +18,8 @@ import com.stripe.android.SetupIntentResult;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardBrand;
+import com.stripe.android.model.CardFunding;
 import com.stripe.android.model.PaymentIntent;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.SetupIntent;
@@ -86,7 +88,7 @@ public class Converters {
 
     result.putString("cardId", card.getId());
     result.putString("number", card.getNumber());
-    result.putString("cvc", card.getCVC() );
+    result.putString("cvc", card.getCvc() );
     result.putInt("expMonth", card.getExpMonth() );
     result.putInt("expYear", card.getExpYear() );
     result.putString("name", card.getName() );
@@ -97,8 +99,8 @@ public class Converters {
     result.putString("addressZip", card.getAddressZip() );
     result.putString("addressCountry", card.getAddressCountry() );
     result.putString("last4", card.getLast4() );
-    result.putString("brand", card.getBrand() );
-    result.putString("funding", card.getFunding() );
+    result.putString("brand", card.getBrand().toString() );
+    result.putString("funding", card.getFunding().toString() );
     result.putString("fingerprint", card.getFingerprint() );
     result.putString("country", card.getCountry() );
     result.putString("currency", card.getCurrency() );
@@ -196,10 +198,10 @@ public class Converters {
       .addressState(getValue(cardData, "addressState"))
       .addressZip(getValue(cardData, "addressZip"))
       .addressCountry(getValue(cardData, "addressCountry"))
-      .brand(getValue(cardData, "brand"))
+      .brand(CardBrand.valueOf(getValue(cardData, "brand")))
       .last4(getValue(cardData, "last4"))
       .fingerprint(getValue(cardData, "fingerprint"))
-      .funding(getValue(cardData, "funding"))
+      .funding(CardFunding.valueOf(getValue(cardData, "funding")) )
       .country(getValue(cardData, "country"))
       .currency(getValue(cardData, "currency"))
       .id(getValue(cardData, "id"))
@@ -288,7 +290,7 @@ public class Converters {
     wm.putString("id", paymentMethod.id);
     wm.putInt("created", paymentMethod.created.intValue());
     wm.putBoolean("livemode", paymentMethod.liveMode);
-    wm.putString("type", paymentMethod.type);
+    wm.putString("type", paymentMethod.type.toString());
     wm.putMap("billingDetails", convertBillingDetailsToWritableMap(paymentMethod.billingDetails));
     wm.putMap("card", convertPaymentMethodCardToWritableMap(paymentMethod.card));
     wm.putString("customerId", paymentMethod.customerId);
@@ -488,7 +490,8 @@ public class Converters {
     return result;
   }
 
-  public static BankAccount createBankAccount(ReadableMap accountData) {
+  // removed in v15
+  /* public static BankAccount createBankAccount(ReadableMap accountData) {
     BankAccount account = new BankAccount(
       // required fields only
       accountData.getString("accountNumber"),
@@ -503,7 +506,7 @@ public class Converters {
     );
 
     return account;
-  }
+  }*/
 
   public static String getStringOrNull(@NonNull ReadableMap map, @NonNull String key) {
     return map.hasKey(key) ? map.getString(key) : null;
