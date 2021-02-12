@@ -312,7 +312,9 @@ public class StripeModule extends ReactContextBaseJavaModule {
               ) {
                 promise.reject(CANCELLED, "Cancelled by user");      // TODO - normalize the message
               } else {
-                promise.reject(FAILED, result.getIntent().getLastPaymentError().getMessage());
+								String code = result.getIntent().getLastPaymentError().getCode()
+								String declineCode = result.getIntent().getLastPaymentError().getDeclineCode()
+                promise.reject(FAILED, code + ":" + declineCode);
               }
             }
           }
