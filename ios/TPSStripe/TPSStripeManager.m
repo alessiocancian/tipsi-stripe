@@ -9,7 +9,7 @@
 #import "TPSStripeManager.h"
 #import <React/RCTUtils.h>
 #import <React/RCTConvert.h>
-#import <Stripe/Stripe.h>
+@import Stripe;
 
 #import "TPSError.h"
 #import "TPSStripeManager+Constants.h"
@@ -302,7 +302,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options errorCodes:(NSDictionary *)errors
     publishableKey = options[@"publishableKey"];
     merchantId = options[@"merchantId"];
     errorCodes = errors;
-    [Stripe setDefaultPublishableKey:publishableKey];
+    [StripeAPI setDefaultPublishableKey:publishableKey];
 }
 
 RCT_EXPORT_METHOD(setStripeAccount:(NSString *)_stripeAccount) {
@@ -857,7 +857,7 @@ RCT_EXPORT_METHOD(paymentRequestWithApplePay:(NSArray *)items
         [summaryItems addObject:summaryItem];
     }
 
-    PKPaymentRequest *paymentRequest = [Stripe paymentRequestWithMerchantIdentifier:merchantId country:countryCode currency:currencyCode];
+    PKPaymentRequest *paymentRequest = [StripeAPI paymentRequestWithMerchantIdentifier:merchantId country:countryCode currency:currencyCode];
 
     [paymentRequest setRequiredShippingAddressFields:requiredShippingAddressFields];
     [paymentRequest setRequiredBillingAddressFields:requiredBillingAddressFields];
@@ -1188,7 +1188,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
 }
 
 - (BOOL)canSubmitPaymentRequest:(PKPaymentRequest *)paymentRequest rejecter:(RCTPromiseRejectBlock)reject {
-    if (![Stripe deviceSupportsApplePay]) {
+    if (![StripeAPI deviceSupportsApplePay]) {
         NSDictionary *error = [errorCodes valueForKey:kErrorKeyDeviceNotSupportsNativePay];
         reject(error[kErrorKeyCode], error[kErrorKeyDescription], nil);
         return NO;
@@ -1214,9 +1214,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
 
 #pragma mark - STPAddCardViewControllerDelegate
 
-- (void)addCardViewController:(STPAddCardViewController *)addCardViewController
-       didCreatePaymentMethod:(STPPaymentMethod *)paymentMethod
-                   completion:(STPErrorBlock)completion {
+- (void)addCardViewController:(STPAddCardViewController *)addCardViewController didCreatePaymentMethod:(STPPaymentMethod *)paymentMethod completion:(void (^)(NSError * _Nullable))completion {
     [RCTPresentedViewController() dismissViewControllerAnimated:YES completion:nil];
 
     requestIsCompleted = YES;
@@ -1300,7 +1298,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
                                             url:TPSAppInfoURL];
     });
 
-    STPAPIClient * client = [[STPAPIClient alloc] initWithPublishableKey:[Stripe defaultPublishableKey]];
+    STPAPIClient * client = [[STPAPIClient alloc] initWithPublishableKey:[StripeAPI defaultPublishableKey]];
     client.appInfo = info;
     client.stripeAccount = stripeAccount;
 
@@ -1493,7 +1491,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
             return @"discover";
         case STPCardBrandDinersClub:
             return @"diners";
-        case STPCardBrandMasterCard:
+        case STPCardBrandMastercard:
             return @"mastercard";
         case STPCardBrandUnknown:
         default:
@@ -1503,7 +1501,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
 
 /// API: https://stripe.com/docs/api/cards/object#card_object-brand
 - (NSString *)cardBrandAsPresentableBrandString:(STPCardBrand)inputBrand {
-    return STPStringFromCardBrand(inputBrand);
+    return [STPCard stringFromBrand:inputBrand];
 }
 
 - (NSString *)cardFunding:(STPCardFundingType)inputFunding {
@@ -1602,7 +1600,7 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
             return @"bancontact";
         case STPSourceTypeGiropay:
             return @"giropay";
-        case STPSourceTypeIDEAL:
+        case STPSourceTypeiDEAL:
             return @"ideal";
         case STPSourceTypeSEPADebit:
             return @"sepaDebit";

@@ -1,6 +1,5 @@
 # Changelog
 
-=======
 ## [8.0.12] - 2020-12-03 
 - Replaced android creditCardInput to official Stripe.CardInputWidget
 - Removed createTokenWithBankAccount
@@ -10,6 +9,10 @@
 ### Note:
 - Behaviour change: Previously, the done button will be disable, if any of the input is incomplete or wrong, now it will enable when the input is complete, but won't disable by itself if user makes any changes.
 
+## [9.0.0] - 2021-03-24
+
+- #741
+- #730 ios: bump stripe-ios to v21
 
 ## [8.0.1] - 2021-01-17
 
